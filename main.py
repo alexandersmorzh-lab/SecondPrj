@@ -231,9 +231,9 @@ def fill_pdf_form(template_path, output_path, data_dict, mapping, template_name)
                     field_value = field_object.get('/V', 'не заполнено')
                     print(f"  - Имя: '{field_name}', Текущее значение: {field_value}")
             else:
-                print("Не удалось получить список полей. Попытаемся восстановить файл")
-                restore_acroform_from_annotations(template_file, 'PDF_Restored.pdf')
-                sys.exit()
+                print("Не удалось получить список полей. ")
+                # restore_acroform_from_annotations(template_file, 'PDF_Restored.pdf')
+                # sys.exit()
 
             # Проходим по всем аннотациям (полям формы) в каждой странице
             for j in range(len(pdf_writer.pages)):
