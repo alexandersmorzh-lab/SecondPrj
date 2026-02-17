@@ -229,14 +229,25 @@ def fill_pdf_form(template_path, output_path, data_dict, mapping, template_name)
                      # Объект поля может содержать различные атрибуты, например /V (значение)
                      # Подробнее о структуре поля: https://gitlab.elegosoft.com/elego/PyPDF2/-/blame/219bb09021a1d607803f27eb195354f75dda29fd/PyPDF2/pdf.py [citation:2]
                     field_value = field_object.get('/V', 'не заполнено')
+                    
+                    
+                    # Ищем, какое поле из анкеты соответствует этому полю PDF
+                    sheet_field_name = None
+                    for sf, pf in template_mapping.items():
+                        if pf == field_name:
+                            sheet_field_name = sf
+                            break
+                    if sheet_field_name and sheet_field_name in data_dict:
+                        field_value = data_dict[sheet_field_name]
                     print(f"  - Имя: '{field_name}', Текущее значение: {field_value}")
+
             else:
                 print("Не удалось получить список полей. ")
                 # restore_acroform_from_annotations(template_file, 'PDF_Restored.pdf')
                 # sys.exit()
 
             # Проходим по всем аннотациям (полям формы) в каждой странице
-            for j in range(len(pdf_writer.pages)):
+            """ for j in range(len(pdf_writer.pages)):
                 page = pdf_writer.pages[j]
                 #  print (f"page {page}")
 
@@ -268,7 +279,7 @@ def fill_pdf_form(template_path, output_path, data_dict, mapping, template_name)
                                         pass
                                         
                                 # Устанавливаем значение поля
-                                """ annot.update({
+                                 annot.update({
                                     PdfWriter..generic.NameObject('/V'): PyPDF.generic.TextStringObject(field_value)
                                 }) """
 
@@ -371,13 +382,22 @@ if __name__ == '__main__':
     print(f"Получено маппингов для шаблонов: {list(mapping.keys())}")
     
     # Получение списка шаблонов PDF из папки на Google Drive
+    filtered_templates = []
     template_files = list_files_in_folder(PDF_TEMPLATES_FOLDER_ID)
     if not template_files:
         print("Не найдено шаблонов PDF. Завершение работы.")
         exit()
     else:
-        # print(f"Найдено шаблонов PDF: {list(template_files('name'))}")
+        print(f"Найдено шаблонов PDF: {len(template_files)}")
+        for tmpl in template_files:
+            print (f"Шаблон - {tmpl['name']}")
+            if tmpl['name'] in list(mapping.keys()):
+                filtered_templates.append(tmpl)
+            else:
+                print (f"Не берем этот шаблон - его нет в Mapping")
         pass
+    # подменим на очищенный список шаблонов для обработки
+    template_files = filtered_templates
         
     # Создаем временные папки
     os.makedirs('templates', exist_ok=True)
